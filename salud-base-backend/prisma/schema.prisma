@@ -1,0 +1,276 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model AuditLog {
+  id        Int      @id @default(autoincrement())
+  tableName String   @db.VarChar(100)
+  recordId  String   @db.VarChar(100)
+  action    String   @db.VarChar(20)
+  oldData   Json?
+  newData   Json?
+  userId    Int?
+  ipAddress String?  @db.VarChar(45)
+  userAgent String?
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([tableName, recordId])
+  @@index([userId])
+}
+
+model AuditoriaAccesos {
+  log_id       BigInt    @id(map: "PK_AuditoriaAccesos") @default(autoincrement())
+  usuario_id   Int?
+  input_login  String?   @db.VarChar(255)
+  fecha_evento DateTime  @default(now())
+  tipo_evento  String    @db.VarChar(50)
+  direccion_ip String?   @db.VarChar(45)
+  user_agent   String?
+  detalle      String?
+  Usuarios     Usuarios? @relation(fields: [usuario_id], references: [usuario_id], onDelete: NoAction, onUpdate: NoAction, map: "FK_AuditoriaAccesos_Usuarios")
+}
+
+model Comunas {
+  comuna_id                                 Int           @id(map: "PK_Comunas") @default(autoincrement())
+  nombre                                    String        @db.VarChar(100)
+  provincia_id                              Int
+  activo                                    Boolean
+  creado_por                                Int?
+  fecha_creacion                            DateTime
+  modificado_por                            Int?
+  fecha_modificacion                        DateTime?
+  codigo                                    String        @unique(map: "UK_Comunas_Codigo") @db.VarChar(10)
+  Usuarios_Comunas_creado_porToUsuarios     Usuarios?     @relation("Comunas_creado_porToUsuarios", fields: [creado_por], references: [usuario_id], onDelete: NoAction, onUpdate: NoAction, map: "FK_Comunas_Creador")
+  Usuarios_Comunas_modificado_porToUsuarios Usuarios?     @relation("Comunas_modificado_porToUsuarios", fields: [modificado_por], references: [usuario_id], onDelete: NoAction, onUpdate: NoAction, map: "FK_Comunas_Modificador")
+  Provincias                                Provincias    @relation(fields: [provincia_id], references: [provincia_id], onUpdate: NoAction, map: "FK_Comunas_Provincias")
+  Prestadores                               Prestadores[]
+}
+
+model Notificaciones {
+  notificacion_id Int      @id(map: "PK_Notificaciones") @default(autoincrement())
+  usuario_id      Int
+  tipo            String   @db.VarChar(50)
+  titulo          String   @db.VarChar(100)
+  mensaje         String   @db.VarChar(500)
+  leida           Boolean  @default(false)
+  metadata        Json?
+  fecha_creacion  DateTime @default(now())
+  Usuarios        Usuarios @relation(fields: [usuario_id], references: [usuario_id], onDelete: Cascade, onUpdate: NoAction, map: "FK_Notificaciones_Usuarios")
+
+  @@index([usuario_id], map: "IX_Notificaciones_Usuario")
+}
+
+model PasswordResetTokens {
+  id         Int       @id(map: "PK__Password__3213E83F2E7C9B97") @default(autoincrement())
+  token      String    @unique(map: "UQ__Password__CA90DA7AC4201756") @db.VarChar(500)
+  usuario_id Int
+  expiresAt  DateTime
+  used       Boolean   @default(false)
+  createdAt  DateTime  @default(now())
+  usedAt     DateTime?
+  Usuarios   Usuarios  @relation(fields: [usuario_id], references: [usuario_id], onDelete: Cascade, onUpdate: NoAction, map: "FK_PasswordResetTokens_Usuarios")
+}
+
+model Permisos {
+  permiso_id                                 Int             @id(map: "PK__Permisos__60B569CD79226DB7") @default(autoincrement())
+  codigo                                     String          @unique(map: "UK_Permisos_Codigo") @db.VarChar(50)
+  modulo                                     String          @db.VarChar(50)
+  accion                                     String          @db.VarChar(50)
+  descripcion                                String?         @db.VarChar(100)
+  activo                                     Boolean         @default(true)
+  creado_por                                 Int?
+  fecha_creacion                             DateTime        @default(now())
+  modificado_por                             Int?
+  fecha_modificacion                         DateTime?
+  Usuarios_Permisos_creado_porToUsuarios     Usuarios?       @relation("Permisos_creado_porToUsuarios", fields: [creado_por], references: [usuario_id], onDelete: NoAction, onUpdate: NoAction, map: "FK_Permisos_Creador")
+  Usuarios_Permisos_modificado_porToUsuarios Usuarios?       @relation("Permisos_modificado_porToUsuarios", fields: [modificado_por], references: [usuario_id], onDelete: NoAction, onUpdate: NoAction, map: "FK_Permisos_Modificador")
+  RolesPermisos                              RolesPermisos[]
+
+  @@index([modulo], map: "IX_Permisos_Modulo")
+}
+
+model Prestadores {
+  prestador_id                                  Int                   @id(map: "PK__Prestado__EE2332185FF08366") @default(autoincrement())
+  rut                                           String                @unique(map: "UK_Prestadores_Rut") @db.VarChar(12)
+  razon_social                                  String                @db.VarChar(255)
+  direccion                                     String?
+  comuna_id                                     Int?
+  telefono                                      String?               @db.VarChar(20)
+  email                                         String?               @db.VarChar(255)
+  activo                                        Boolean               @default(true)
+  creado_por                                    Int?
+  fecha_creacion                                DateTime              @default(now())
+  modificado_por                                Int?
+  fecha_modificacion                            DateTime?
+  Comunas                                       Comunas?              @relation(fields: [comuna_id], references: [comuna_id], onUpdate: NoAction, map: "FK_Prestadores_Comuna")
+  Usuarios_Prestadores_creado_porToUsuarios     Usuarios?             @relation("Prestadores_creado_porToUsuarios", fields: [creado_por], references: [usuario_id], onDelete: NoAction, onUpdate: NoAction, map: "FK_Prestadores_Creador")
+  Usuarios_Prestadores_modificado_porToUsuarios Usuarios?             @relation("Prestadores_modificado_porToUsuarios", fields: [modificado_por], references: [usuario_id], onDelete: NoAction, onUpdate: NoAction, map: "FK_Prestadores_Modificador")
+  UsuariosPrestadores                           UsuariosPrestadores[]
+}
+
+model Provincias {
+  provincia_id                                 Int       @id(map: "PK_Provincias") @default(autoincrement())
+  nombre                                       String    @db.VarChar(100)
+  region_id                                    Int
+  activo                                       Boolean
+  creado_por                                   Int?
+  fecha_creacion                               DateTime
+  modificado_por                               Int?
+  fecha_modificacion                           DateTime?
+  codigo                                       String    @unique(map: "UK_Provincias_Codigo") @db.VarChar(10)
+  Comunas                                      Comunas[]
+  Usuarios_Provincias_creado_porToUsuarios     Usuarios? @relation("Provincias_creado_porToUsuarios", fields: [creado_por], references: [usuario_id], onDelete: NoAction, onUpdate: NoAction, map: "FK_Provincias_Creador")
+  Usuarios_Provincias_modificado_porToUsuarios Usuarios? @relation("Provincias_modificado_porToUsuarios", fields: [modificado_por], references: [usuario_id], onDelete: NoAction, onUpdate: NoAction, map: "FK_Provincias_Modificador")
+  Regiones                                     Regiones  @relation(fields: [region_id], references: [region_id], onUpdate: NoAction, map: "FK_Provincias_Regiones")
+}
+
+model RefreshTokens {
+  id         Int      @id(map: "PK_RefreshTokens") @default(autoincrement())
+  token      String   @unique(map: "UK_RefreshTokens_token") @db.VarChar(255)
+  usuario_id Int
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  revoked    Boolean  @default(false)
+  Usuarios   Usuarios @relation(fields: [usuario_id], references: [usuario_id], onDelete: Cascade, onUpdate: NoAction, map: "FK_RefreshTokens_Usuarios")
+}
+
+model Regiones {
+  region_id                                  Int                @id(map: "PK__Regiones__01146BAE902E3751") @default(autoincrement())
+  codigo                                     String             @unique(map: "UK_Regiones_Codigo") @db.VarChar(10)
+  nombre                                     String             @unique(map: "UK_Regiones_Nombre") @db.VarChar(100)
+  activo                                     Boolean            @default(true)
+  creado_por                                 Int?
+  fecha_creacion                             DateTime           @default(now())
+  modificado_por                             Int?
+  fecha_modificacion                         DateTime?
+  abreviatura                                String?            @db.VarChar(10)
+  orden_visual                               Int?
+  Provincias                                 Provincias[]
+  Usuarios_Regiones_creado_porToUsuarios     Usuarios?          @relation("Regiones_creado_porToUsuarios", fields: [creado_por], references: [usuario_id], onDelete: NoAction, onUpdate: NoAction, map: "FK_Regiones_Creador")
+  Usuarios_Regiones_modificado_porToUsuarios Usuarios?          @relation("Regiones_modificado_porToUsuarios", fields: [modificado_por], references: [usuario_id], onDelete: NoAction, onUpdate: NoAction, map: "FK_Regiones_Modificador")
+  UsuariosRegiones                           UsuariosRegiones[]
+}
+
+model Roles {
+  rol_id                                  Int             @id(map: "PK__Roles__CF32E443FAC8A974") @default(autoincrement())
+  codigo                                  String          @unique(map: "UK_Roles_Codigo") @db.VarChar(50)
+  nombre                                  String          @unique(map: "UK_Roles_Nombre") @db.VarChar(50)
+  descripcion                             String?
+  requiere_contexto                       String          @db.VarChar(20)
+  activo                                  Boolean         @default(true)
+  creado_por                              Int?
+  fecha_creacion                          DateTime        @default(now())
+  modificado_por                          Int?
+  fecha_modificacion                      DateTime?
+  Usuarios_Roles_creado_porToUsuarios     Usuarios?       @relation("Roles_creado_porToUsuarios", fields: [creado_por], references: [usuario_id], onDelete: NoAction, onUpdate: NoAction, map: "FK_Roles_Creador")
+  Usuarios_Roles_modificado_porToUsuarios Usuarios?       @relation("Roles_modificado_porToUsuarios", fields: [modificado_por], references: [usuario_id], onDelete: NoAction, onUpdate: NoAction, map: "FK_Roles_Modificador")
+  RolesPermisos                           RolesPermisos[]
+  UsuariosRoles                           UsuariosRoles[]
+}
+
+model RolesPermisos {
+  rol_id           Int
+  permiso_id       Int
+  fecha_asignacion DateTime @default(now())
+  Permisos         Permisos @relation(fields: [permiso_id], references: [permiso_id], onDelete: Cascade, onUpdate: NoAction, map: "FK_RolesPermisos_Permisos")
+  Roles            Roles    @relation(fields: [rol_id], references: [rol_id], onDelete: Cascade, onUpdate: NoAction, map: "FK_RolesPermisos_Roles")
+
+  @@id([rol_id, permiso_id], map: "PK_RolesPermisos")
+  @@index([permiso_id], map: "IX_RolesPermisos_Permiso")
+  @@index([rol_id], map: "IX_RolesPermisos_Rol")
+}
+
+model Usuarios {
+  usuario_id                                                         Int                    @id(map: "PK_Usuarios") @default(autoincrement())
+  rut                                                                String                 @unique(map: "UK_Usuarios_Rut") @db.VarChar(12)
+  nombres                                                            String                 @db.VarChar(100)
+  primer_apellido                                                    String                 @db.VarChar(100)
+  segundo_apellido                                                   String?                @db.VarChar(100)
+  tipo_usuario                                                       String                 @db.VarChar(10)
+  correo_electronico                                                 String                 @unique(map: "UK_Usuarios_Correo") @db.VarChar(255)
+  tipo_autenticacion                                                 String                 @db.VarChar(20)
+  password_hash                                                      String?                @db.VarChar(255)
+  activo                                                             Boolean                @default(true)
+  bloqueado                                                          Boolean                @default(false)
+  intentos_fallidos                                                  Int                    @default(0)
+  fecha_bloqueo                                                      DateTime?
+  creado_por                                                         Int?
+  fecha_creacion                                                     DateTime               @default(now())
+  modificado_por                                                     Int?
+  fecha_modificacion                                                 DateTime?
+  fecha_ultimo_login                                                 DateTime?
+  AuditoriaAccesos                                                   AuditoriaAccesos[]
+  Comunas_Comunas_creado_porToUsuarios                               Comunas[]              @relation("Comunas_creado_porToUsuarios")
+  Comunas_Comunas_modificado_porToUsuarios                           Comunas[]              @relation("Comunas_modificado_porToUsuarios")
+  Notificaciones                                                     Notificaciones[]
+  PasswordResetTokens                                                PasswordResetTokens[]
+  Permisos_Permisos_creado_porToUsuarios                             Permisos[]             @relation("Permisos_creado_porToUsuarios")
+  Permisos_Permisos_modificado_porToUsuarios                         Permisos[]             @relation("Permisos_modificado_porToUsuarios")
+  Prestadores_Prestadores_creado_porToUsuarios                       Prestadores[]          @relation("Prestadores_creado_porToUsuarios")
+  Prestadores_Prestadores_modificado_porToUsuarios                   Prestadores[]          @relation("Prestadores_modificado_porToUsuarios")
+  Provincias_Provincias_creado_porToUsuarios                         Provincias[]           @relation("Provincias_creado_porToUsuarios")
+  Provincias_Provincias_modificado_porToUsuarios                     Provincias[]           @relation("Provincias_modificado_porToUsuarios")
+  RefreshTokens                                                      RefreshTokens[]
+  Regiones_Regiones_creado_porToUsuarios                             Regiones[]             @relation("Regiones_creado_porToUsuarios")
+  Regiones_Regiones_modificado_porToUsuarios                         Regiones[]             @relation("Regiones_modificado_porToUsuarios")
+  Roles_Roles_creado_porToUsuarios                                   Roles[]                @relation("Roles_creado_porToUsuarios")
+  Roles_Roles_modificado_porToUsuarios                               Roles[]                @relation("Roles_modificado_porToUsuarios")
+  Usuarios_Usuarios_creado_porToUsuarios                             Usuarios?              @relation("Usuarios_creado_porToUsuarios", fields: [creado_por], references: [usuario_id], onDelete: NoAction, onUpdate: NoAction, map: "FK_Usuarios_Creador")
+  other_Usuarios_Usuarios_creado_porToUsuarios                       Usuarios[]             @relation("Usuarios_creado_porToUsuarios")
+  Usuarios_Usuarios_modificado_porToUsuarios                         Usuarios?              @relation("Usuarios_modificado_porToUsuarios", fields: [modificado_por], references: [usuario_id], onDelete: NoAction, onUpdate: NoAction, map: "FK_Usuarios_Modificador")
+  other_Usuarios_Usuarios_modificado_porToUsuarios                   Usuarios[]             @relation("Usuarios_modificado_porToUsuarios")
+  UsuariosPrestadores_UsuariosPrestadores_asignado_porToUsuarios     UsuariosPrestadores[]  @relation("UsuariosPrestadores_asignado_porToUsuarios")
+  UsuariosPrestadores_UsuariosPrestadores_usuario_idToUsuarios       UsuariosPrestadores[]  @relation("UsuariosPrestadores_usuario_idToUsuarios")
+  UsuariosRegiones_UsuariosRegiones_asignado_porToUsuarios           UsuariosRegiones[]     @relation("UsuariosRegiones_asignado_porToUsuarios")
+  UsuariosRegiones_UsuariosRegiones_usuario_idToUsuarios             UsuariosRegiones[]     @relation("UsuariosRegiones_usuario_idToUsuarios")
+  UsuariosRoles_UsuariosRoles_asignado_porToUsuarios                 UsuariosRoles[]        @relation("UsuariosRoles_asignado_porToUsuarios")
+  UsuariosRoles_UsuariosRoles_usuario_idToUsuarios                   UsuariosRoles[]        @relation("UsuariosRoles_usuario_idToUsuarios")
+}
+
+model UsuariosPrestadores {
+  usuario_id                                          Int
+  prestador_id                                        Int
+  fecha_asignacion                                    DateTime    @default(now())
+  asignado_por                                        Int?
+  Usuarios_UsuariosPrestadores_asignado_porToUsuarios Usuarios?   @relation("UsuariosPrestadores_asignado_porToUsuarios", fields: [asignado_por], references: [usuario_id], onDelete: NoAction, onUpdate: NoAction, map: "FK_UsuariosPrestadores_Asignador")
+  Prestadores                                         Prestadores @relation(fields: [prestador_id], references: [prestador_id], onDelete: Cascade, onUpdate: NoAction, map: "FK_UsuariosPrestadores_Prestadores")
+  Usuarios_UsuariosPrestadores_usuario_idToUsuarios   Usuarios    @relation("UsuariosPrestadores_usuario_idToUsuarios", fields: [usuario_id], references: [usuario_id], onDelete: Cascade, onUpdate: NoAction, map: "FK_UsuariosPrestadores_Usuarios")
+
+  @@id([usuario_id, prestador_id], map: "PK_UsuariosPrestadores")
+  @@index([prestador_id], map: "IX_UsuariosPrestadores_Prestador")
+  @@index([usuario_id], map: "IX_UsuariosPrestadores_Usuario")
+}
+
+model UsuariosRegiones {
+  usuario_id                                       Int
+  region_id                                        Int
+  fecha_asignacion                                 DateTime  @default(now())
+  asignado_por                                     Int?
+  Usuarios_UsuariosRegiones_asignado_porToUsuarios Usuarios? @relation("UsuariosRegiones_asignado_porToUsuarios", fields: [asignado_por], references: [usuario_id], onDelete: NoAction, onUpdate: NoAction, map: "FK_UsuariosRegiones_Asignador")
+  Regiones                                         Regiones  @relation(fields: [region_id], references: [region_id], onDelete: Cascade, onUpdate: NoAction, map: "FK_UsuariosRegiones_Regiones")
+  Usuarios_UsuariosRegiones_usuario_idToUsuarios   Usuarios  @relation("UsuariosRegiones_usuario_idToUsuarios", fields: [usuario_id], references: [usuario_id], onDelete: Cascade, onUpdate: NoAction, map: "FK_UsuariosRegiones_Usuarios")
+
+  @@id([usuario_id, region_id], map: "PK_UsuariosRegiones")
+  @@index([region_id], map: "IX_UsuariosRegiones_Region")
+  @@index([usuario_id], map: "IX_UsuariosRegiones_Usuario")
+}
+
+model UsuariosRoles {
+  usuario_id                                    Int
+  rol_id                                        Int
+  fecha_asignacion                              DateTime  @default(now())
+  asignado_por                                  Int?
+  Usuarios_UsuariosRoles_asignado_porToUsuarios Usuarios? @relation("UsuariosRoles_asignado_porToUsuarios", fields: [asignado_por], references: [usuario_id], onDelete: NoAction, onUpdate: NoAction, map: "FK_UsuariosRoles_Asignador")
+  Roles                                         Roles     @relation(fields: [rol_id], references: [rol_id], onDelete: Cascade, onUpdate: NoAction, map: "FK_UsuariosRoles_Roles")
+  Usuarios_UsuariosRoles_usuario_idToUsuarios   Usuarios  @relation("UsuariosRoles_usuario_idToUsuarios", fields: [usuario_id], references: [usuario_id], onDelete: Cascade, onUpdate: NoAction, map: "FK_UsuariosRoles_Usuarios")
+
+  @@id([usuario_id, rol_id], map: "PK_UsuariosRoles")
+  @@index([rol_id], map: "IX_UsuariosRoles_Rol")
+  @@index([usuario_id], map: "IX_UsuariosRoles_Usuario")
+}
