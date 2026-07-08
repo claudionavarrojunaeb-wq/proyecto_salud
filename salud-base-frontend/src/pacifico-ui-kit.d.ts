@@ -1,1 +1,1 @@
-declare module '@pacifico/ui-kit';
+declare module '../junaeb-ds-kit/dist/junaeb-ds-kit';

@@ -9,7 +9,7 @@ import {
   StatusBadge,
   Select,
   useSnackbar,
-} from '@pacifico/ui-kit';
+} from 'junaeb-ds-kit';
 import { useCrud } from '../../hooks/use-crud';
 import { CrudView, type CrudColumn } from '../../components/Crud';
 import api from '../../lib/axios';

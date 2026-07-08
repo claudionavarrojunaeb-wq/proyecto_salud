@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
-import { FormField, Input, Button, useSnackbar } from '@pacifico/ui-kit';
+import { FormField, Input, Button, useSnackbar } from 'junaeb-ds-kit';
 import { Lock, User } from 'lucide-react';
 import { authService } from '../../services/auth.service';
 import { useAuthStore } from '../../stores/auth-store';

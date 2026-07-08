@@ -2,7 +2,7 @@
 @import "tailwindcss";
 @import "@pacifico/ui-kit/tokens";
 
-@source "../node_modules/@pacifico/ui-kit/src";
+@source "../junaeb-ds-kit/dist/junaeb-ds-kit.css";
 
 @theme {
   --font-display: 'Source Serif 4', Georgia, serif;

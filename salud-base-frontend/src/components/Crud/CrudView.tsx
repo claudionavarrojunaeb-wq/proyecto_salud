@@ -7,7 +7,7 @@ import {
   Spinner,
   EmptyState,
   I,
-} from '@pacifico/ui-kit';
+} from 'junaeb-ds-kit';
 import { Pencil, Trash2, Plus, ChevronLeft, ChevronRight } from 'lucide-react';
 
 export interface CrudColumn<T> {

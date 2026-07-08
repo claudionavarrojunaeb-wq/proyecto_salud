@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Outlet, useLocation, useNavigate, Link } from 'react-router-dom';
-import { useSnackbar } from '@pacifico/ui-kit';
+import { useSnackbar } from 'junaeb-ds-kit';
 import { ChevronRight } from 'lucide-react';
 import { Header } from './Header';
 import { Sidebar } from './Sidebar';

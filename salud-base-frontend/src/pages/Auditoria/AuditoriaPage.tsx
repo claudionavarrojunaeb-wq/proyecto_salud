@@ -1,4 +1,4 @@
-import { Tabs } from '@pacifico/ui-kit';
+import { Tabs } from 'junaeb-ds-kit';
 import { useCrud } from '../../hooks/use-crud';
 import { CrudView, type CrudColumn } from '../../components/Crud';
 import type { AuditoriaAcceso, AuditLog } from '../../types';

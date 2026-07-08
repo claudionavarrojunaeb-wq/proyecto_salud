@@ -8,7 +8,7 @@ import {
   Toggle,
   StatusBadge,
   useSnackbar,
-} from '@pacifico/ui-kit';
+} from 'junaeb-ds-kit';
 import { useCrud } from '../../hooks/use-crud';
 import { CrudView, type CrudColumn } from '../../components/Crud';
 import type { Permiso } from '../../types';

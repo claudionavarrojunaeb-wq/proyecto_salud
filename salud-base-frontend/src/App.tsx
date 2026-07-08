@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import { DarkModeProvider, SnackbarProvider } from '@pacifico/ui-kit';
+import { DarkModeProvider, SnackbarProvider } from 'junaeb-ds-kit';
 import { ProtectedRoute } from './components/Auth/ProtectedRoute';
 import { AppLayout } from './components/Layout/AppLayout';
 import { LoginPage } from './pages/Login/LoginPage';
